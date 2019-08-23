@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <select id="year-select">
+</select>
+
+<select id="month-select">
+</select>
+
+<select id="day-select">
+</select>
+
+<select id="hour-select">
+</select>
+
+<select id="minite-select">
+</select>
+
+<select id="second-select">
+</select>
+
+<p id="result-wrapper">现在距离 2001年1月1日星期X HH:MM:SS 还有 X 天 X 小时 X 分 X 秒</p>
+  <script>　
+    var select = document.querySelectorAll('select');
+    var para = document.querySelector('p');
+    var selectYear = document.querySelector('#year-select');
+    var selectMonth = document.querySelector('#month-select');
+    var selectDat = document.querySelector('#day-select');
+    var selectHour = document.querySelector('#hour-select');
+    var selectMinute = document.querySelector('#minite-select');
+    var selectSecond = document.querySelector('#second-select');
+    //给年份和月份的select项绑定方法c，根据年月改变天数
+    select[0].addEventListener('change', c);
+    select[1].addEventListener('change', c); 
+    //增添option节点的方法
+    function addItems(firstValue, parentNode, lastValue) {
+      for (var i = firstValue; i <= lastValue; i++) {
+        var option = document.createElement('option');
+        option.setAttribute('value', i);
+        if (i < 10) {
+          i = '0' + i;
+        }
+        option.innerHTML = i;
+        parentNode.appendChild(option);
+      }
+    }
+    //window加载时，先把DOM补全
+    window.onload = function() {
+      addItems(1971, select[0], 2099);
+      addItems(1, select[1], 12);
+      addItems(1, select[2], 31);
+      addItems(0, select[3], 23);
+      addItems(0, select[4], 59);
+      addItems(0, select[5], 59);
+    }
+    //select域被改变时的事件，结果是改变p标签的内容
+    document.body.onchange = function(e) {
+      var e = e || window.event;
+      var target = e.target || e.srcElement;
+      if (target.nodeName.toLowerCase() == 'select') {
+        para.innerHTML = res();
+      }
+    }
+
+    //闰年2月份29天，平年2月份28天。大月31天，小月30天   
+    function c(){  
+      len = select[2].children.length;
+      for (var i = 0; i < len; i++) {
+        select[2].removeChild(select[2].childNodes[0]); 
+      }
+      if (selectMonth.value == 2) {
+        if (selectYear.value % 4 == 0 || selectYear.value % 400 == 0) {
+          addItems(1, select[2], 29);
+        }else{
+          addItems(1, select[2], 28);
+        }
+      }else if (selectMonth.value == 4 || selectMonth.value == 6 || selectMonth.value == 9 || selectMonth.value == 11) {
+        addItems(1, select[2], 30);
+      }else{
+        addItems(1, select[2], 31)
+      }
+    }
+    //获取当前日期周天
+    function week() {
+      var day = new Date().getDay();
+      var arr = ['日','一','二','三','四','五','六'];
+      for (var i = 0, len = arr.length; i< len; i++) {
+        if (i == day) {
+          return arr[i];
+        }
+      }
+    }
+    //获取选择日期周天
+    function selectWeek(s) {
+      var day = new Date(s).getDay();
+      var arr = ['日','一','二','三','四','五','六'];
+      for (var i = 0, len = arr.length; i < len; i++) {
+        if (i == day) {
+          return arr[i];
+        }
+      }
+    }
+    //日期差方法，返回相差天、时、分、秒
+    function diffDate(obj1, obj2) {   
+        var diff = obj2 - obj1;
+        var dd = Math.floor(diff/(24*3600*1000));
+        var rest1 = diff%(24*3600*1000);
+        var dh = Math.floor(rest1/(3600*1000));
+        var rest2 = rest1%(3600*1000);
+        var dm = Math.floor(rest2/(60*1000));
+        var rest3 = rest2%(60*1000);
+        var ds = Math.floor(rest3/1000);
+        result = ' ' + dd + '天' + dh + '小时' + dm + '分' + ds + '秒'
+        return result;   
+    }
+    //最终结果方法
+    function res() {
+      var date = new Date();
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1;
+      var dat = date.getDate();
+      var hour = date.getHours();
+      var minute = date.getMinutes();
+      var second = date.getSeconds();
+
+      var val = selectYear.value + '/' + selectMonth.value + '/' + selectDat.value + '/' + selectHour.value + ':' + selectMinute.value + ':' + selectSecond.value;
+      var dateSelect = new Date(val);
+      var date1 = dateSelect.getTime();
+      var date2 = date.getTime();
+
+      if (date1 <= date2) {
+        return '现在是  ' + year + '年' + month + '月' + dat + '日 星期' + week() + ' ' + hour + ':'+ minute + ':' + second +', 距离' + selectYear.value + '年' + selectMonth.value + '月' + selectDat.value + '日 星期' +selectWeek(val) + ' ' + selectHour.value + ':' + selectMinute.value + ':' + selectSecond.value + ' 已经过去' + diffDate(date1, date2);  
+      }else {
+        return '现在是  ' + year + '年' + month + '月' + dat + '日 星期' + week() + ' ' + hour + ':'+ minute + ':' + second +', 距离' + selectYear.value + '年' + selectMonth.value + '月' + selectDat.value + '日 星期' +selectWeek(val) + ' ' + selectHour.value + ':' + selectMinute.value + ':' + selectSecond.value + ' 还有' + diffDate(date2, date1);  
+      }
+    }  
+  </script>
+</body>
+</html>
